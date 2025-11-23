@@ -1,13 +1,34 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mini Arcade</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Mini Arcade</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <style>
+    :root{--bg:#111;--surface:#1e1e1e;--primary:#00f2ff;--text:#e5e5e5;font-family:system-ui,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);display:flex;justify-content:center;align-items:center;min-height:100vh}
+    #app{width:100%;max-width:420px;text-align:center}
+    button{background:var(--primary);border:none;color:#000;padding:.6rem 1.2rem;border-radius:6px;font-weight:600;margin:.25rem;cursor:pointer}
+    button:active{transform:scale(.96)}
+    canvas{display:block;margin:.5rem auto;background:#000}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.5rem 0}
+    .cell,.card{width:100%;aspect-ratio:1/1;font-size:2rem}
+    .memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.5rem 0}
+    input{padding:.5rem;border-radius:4px;border:none;text-align:center}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const games={tictactoe:{name:'Tic-Tac-Toe',run(a){let b=Array(9).fill(''),p='X',w=()=>{a.innerHTML=`<h2>Tic-Tac-Toe</h2><div class="grid">${b.map((c,i)=>`<button class="cell" data-i="${i}">${c}</button>`).join('')}</div><p id="status">Player ${p}</p><button id="reset">Reset</button>`;a.querySelectorAll('.cell').forEach(q=>q.addEventListener('click',m));a.querySelector('#reset').addEventListener('click',()=>{b=Array(9).fill('');p='X';w()})},m=e=>{const i=+e.target.dataset.i;if(b[i])return;b[i]=p;p=p==='X'?'O':'X';w();const wn=[ [0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6] ].find(l=>b[l[0]]&&b[l[0]]===b[l[1]]&&b[l[0]]===b[l[2]]);if(wn)a.querySelector('#status').textContent=`${b[wn[0]]} wins!`;else if(!b.includes(''))a.querySelector('#status').textContent='Draw';};w()}},
+memory:{name:'Memory Match',run(a){const em=['🎮','🎯','🎲','🎪','🎨','🎭'],c=[...em,...em].sort(()=>Math.random()-.5);let f=null,l=false,r=()=>{a.innerHTML=`<h2>Memory Match</h2><div class="memory-grid">${c.map((v,i=>`<button class="card" data-i="${i}">?</button>`).join('')}</div><p>Find all pairs!</p>`;a.querySelectorAll('.card').forEach(q=>q.addEventListener('click',t))},t=e=>{const b=e.target,i=+b.dataset.i;if(l||b.textContent!=='?')return;b.textContent=c[i];if(f===null){f=i;return}l=true;if(c[f]===c[i]){f=null;l=false}else setTimeout(()=>{a.querySelectorAll('.card')[f].textContent='?';b.textContent='?';f=null;l=false},600)};r()}},
+snake:{name:'Snake',run(a){const s=20,r=20;let d={x:1,y:0},q=[{x:10,y:10}],f={x:Math.floor(Math.random()*r),y:Math.floor(Math.random()*s)},g=true;const c=document.createElement('canvas');c.width=c.height=s*r;a.innerHTML='<h2>Snake</h2>';a.appendChild(c);const x=c.getContext('2d'),m=()=>{x.fillStyle='#111';x.fillRect(0,0,c.width,c.height);x.fillStyle='#0f0';q.forEach(p=>x.fillRect(p.x*s,p.y*s,s-2,s-2));x.fillStyle='#f43';x.fillRect(f.x*s,f.y*s,s-2,s-2)},h=()=>{if(!g)return;const n={x:q[0].x+d.x,y:q[0].y+d.y};if(n.x<0||n.x>=r||n.y<0||n.y>=s||q.some(p=>p.x===n.x&&p.y===n.y)){alert('Game Over – refresh to retry');return}q.unshift(n);if(n.x===f.x&&n.y===f.y){f={x:Math.floor(Math.random()*r),y:Math.floor(Math.random()*s)}else q.pop();m()};document.addEventListener('keydown',e=>{if(e.key==='ArrowUp'&&d.y===0)d={x:0,y:-1};if(e.key==='ArrowDown'&&d.y===0)d={x:0,y:1};if(e.key==='ArrowLeft'&&d.x===0)d={x:-1,y:0};if(e.key==='ArrowRight'&&d.x===0)d={x:1,y:0}});m();setInterval(h,120)}},
+pong:{name:'Pong',run(a){const w=480,h=320,p=70,b=8;let ba={x:w/2,y:h/2,dx:4,dy:3},pl={y:h/2-40},pr={y:h/2-40},s={l:0,r:0};const c=document.createElement('canvas');c.width=w;c.height=h;a.innerHTML='<h2>Pong</h2>';a.appendChild(c);const x=c.getContext('2d'),d=()=>{x.fillStyle='#111';x.fillRect(0,0,w,h);x.fillStyle='#0ff';x.fillRect(10,pl.y,p,80);x.fillRect(w-20,pr.y,p,80);x.fillRect(ba.x-b/2,ba.y-b/2,b,b);x.fillText(`${s.l} ${s.r}`,w/2-20,20)},m=()=>{ba.x+=ba.dx;ba.y+=ba.dy;if(ba.y<=0||ba.y>=h)ba.dy*=-1;if(ba.x<=20&&ba.y>pl.y&&ba.y<pl.y+80)ba.dx*=-1;if(ba.x>=w-20&&ba.y>pr.y&&ba.y<pr.y+80)ba.dx*=-1;if(ba.x<0){s.r++;ba={x:w/2,y:h/2,dx:4,dy:3}}if(ba.x>w){s.l++;ba={x:w/2,y:h/2,dx:-4,dy:3}}d();requestAnimationFrame(m)};c.addEventListener('mousemove',e=>pl.y=e.offsetY-40);document.addEventListener('keydown',e=>{if(e.key==='ArrowUp')pr.y-=20;if(e.key==='ArrowDown')pr.y+=20});d();m()}},
+hangman:{name:'Hangman',run(a){const w=['REACT','VITE','ARCADE','MOBILE','GITHUB'],p=w[Math.floor(Math.random()*w.length)];let g=new Set(),f=0,r=()=>{const d=p.split('').map(c=>g.has(c)?c:'_').join(' '),y=Array.from(g).filter(c=>!p.includes(c)).join(' ');a.innerHTML=`<h2>Hangman</h2><p>${d}</p><p>Wrong: ${y}</p><p>Fails: ${f}/6</p><input id="l" maxlength="1" placeholder="Guess a letter"><button id="go">Guess</button>`;a.querySelector('#go').addEventListener('click',h);a.querySelector('#l').addEventListener('keyup',e=>{if(e.key==='Enter')h()});a.querySelector('#l').focus()},h=()=>{const v=a.querySelector('#l').value.toUpperCase();if(!v||g.has(v))return;g.add(v);if(!p.includes(v))f++;r();if(p.split('').every(c=>g.has(c)))a.innerHTML+='<p><strong>You win!</strong></p>';else if(f>=6)a.innerHTML+=`<p><strong>Game over!</strong> Word was ${p}</p>`;a.querySelector('#l').value='';a.querySelector('#l').focus()};r()}},
+breakout:{name:'Breakout',run(a){const w=480,h=320,p=70,bw=48,bh=20,m=2;const br=[];for(let r=0;r<5;r++)for(let c=0;c<10;c++)br.push({x:c*(bw+m),y:r*(bh+m)+40,alive:true});let pl={x:w/2-p/2,y:h-30},ba={x:w/2,y:h/2,dx:3,dy:-3},s=0;const c=document.createElement('canvas');c.width=w;c.height=h;a.innerHTML='<h2>Breakout</h2>';a.appendChild(c);const x=c.getContext('2d'),d=()=>{x.fillStyle='#111';x.fillRect(0,0,w,h);x.fillStyle='#f43';br.filter(b=>b.alive).forEach(b=>x.fillRect(b.x,b.y,bw,bh));x.fillStyle='#0ff';x.fillRect(pl.x,pl.y,p,8);x.fillStyle='#fff';x.beginPath();x.arc(ba.x,ba.y,6,0,Math.PI*2);x.fill();x.fillText(`Score: ${s}`,8,24)},l=()=>{ba.x+=ba.dx;ba.y+=ba.dy;if(ba.x<=6||ba.x>=w-6)ba.dx*=-1;if(ba.y<=6)ba.dy*=-1;if(ba.y>=h){alert('Game Over – refresh to retry');return}if(ba.y>=pl.y-6&&ba.x>pl.x&&ba.x<pl.x+p)ba.dy*=-1;br.filter(b=>b.alive).forEach(b=>{if(ba.x>b.x&&ba.x<b.x+bw&&ba.y>b.y&&ba.y<b.y+bh){b.alive=false;ba.dy*=-1;s++}});if(br.every(b=>!b.alive)){alert('You cleared the wall!');return}d();requestAnimationFrame(l)};c.addEventListener('mousemove',e=>pl.x=e.offsetX-p/2);d();l()}}
+};
+function initHub(r){r.innerHTML=`<h1>Mini Arcade</h1><div id="menu">${Object.values(games).map(g=>`<button data-g="${g.name}">${g.name}</button>`).join('')}</div><div id="screen"></div>`;const s=r.querySelector('#screen');r.querySelectorAll('#menu button').forEach(b=>b.addEventListener('click',()=>{s.innerHTML='';games[Object.keys(games).find(k=>games[k].name===b.dataset.g)].run(s)}))}
+initHub(document.querySelector('#app'));
+</script>
+</body>
 </html>
